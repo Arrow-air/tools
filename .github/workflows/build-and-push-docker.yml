@@ -50,17 +50,10 @@ jobs:
             type=semver,pattern={{version}},value=${{steps.dotenv.outputs.version}}
             type=semver,pattern={{major}}.{{minor}},value=${{steps.dotenv.outputs.version}}
 
-      - name: Check .env file has changed for publication
-        id: dotenv-changed
-        uses: tj-actions/changed-files@v29.0.2
-        with:
-          files: |
-            docker/${{ matrix.image }}/.env
-
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
           context: docker/${{ matrix.image }}/
-          push: ${{ github.event_name != 'pull_request' && steps.dotenv-changed.outputs.any_changed == 'true' }}
+          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
