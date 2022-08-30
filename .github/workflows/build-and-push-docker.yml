@@ -1,0 +1,66 @@
+name: Create and publish a Docker image
+
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    branches:
+      - 'main'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        image: ["arrow-rust"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Dotenv Action
+        uses: falti/dotenv-action@v0.2.8
+        id: dotenv
+        with:
+          path: docker/${{ matrix.image }}/.env
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ghcr.io/${{ github.repository }}/${{ matrix.image }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}},value=${{steps.dotenv.outputs.version}}
+            type=semver,pattern={{major}}.{{minor}},value=${{steps.dotenv.outputs.version}}
+
+      - name: Check .env file has changed for publication
+        id: dotenv-changed
+        uses: tj-actions/changed-files@v29.0.2
+        with:
+          files: |
+            docker/${{ matrix.image }}/.env
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: docker/${{ matrix.image }}/
+          push: ${{ github.event_name != 'pull_request' && steps.dotenv-changed.outputs.any_changed == 'true' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
