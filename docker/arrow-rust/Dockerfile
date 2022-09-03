@@ -1,4 +1,4 @@
-FROM rust:1.61-alpine3.16
+FROM rust:1.63-alpine3.16
 
 ARG FLAKE8_VERSION=5.0.4
 
