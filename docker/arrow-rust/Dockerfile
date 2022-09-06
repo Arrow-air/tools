@@ -8,6 +8,8 @@ ENV RUSTUP_HOME=/usr/local/rustup \
 
 RUN apk add --no-cache musl-dev libc-dev py3-pip pkgconfig openssl openssl-dev git && \
 	pip install flake8==$FLAKE8_VERSION && \
+	pip install flake8-bugbear && \
+	pip install flake8-black && \
 	pip install yapf && \
 	rustup target add x86_64-unknown-linux-musl && \
 	rustup component add clippy && \
