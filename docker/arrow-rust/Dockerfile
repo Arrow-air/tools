@@ -1,3 +1,18 @@
+FROM rust:1.63-alpine3.16 AS taplo-build
+
+ARG TAPLO_VERSION=0.7.0
+
+WORKDIR /build
+
+RUN apk add --no-cache musl-dev && \
+	wget https://github.com/tamasfe/taplo/archive/refs/tags/release-taplo-cli-$TAPLO_VERSION.tar.gz && \
+	tar axvf release-taplo-cli-$TAPLO_VERSION.tar.gz && \
+	cd taplo-release-taplo-cli-$TAPLO_VERSION && \
+	cargo build -p taplo-cli --release && \
+	cd .. && \
+	mv taplo-release-taplo-cli-$TAPLO_VERSION/target/release/taplo . && \
+	rm -rf taplo-release-taplo-cli-$TAPLO_VERSION
+
 FROM rust:1.63-alpine3.16
 
 ARG FLAKE8_VERSION=5.0.4
@@ -5,6 +20,8 @@ ARG FLAKE8_VERSION=5.0.4
 ENV RUSTUP_HOME=/usr/local/rustup \
 	CARGO_HOME=/usr/local/cargo \
 	PATH=/usr/local/cargo/bin:$PATH
+
+COPY --from=taplo-build /build/taplo /usr/bin/taplo
 
 RUN apk add --no-cache musl-dev libc-dev py3-pip pkgconfig openssl openssl-dev git npm && \
 	# Add python dependencies
@@ -19,15 +36,6 @@ RUN apk add --no-cache musl-dev libc-dev py3-pip pkgconfig openssl openssl-dev g
 	# Add rust dependencies
 	rustup target add x86_64-unknown-linux-musl && \
 	rustup component add clippy && \
-	rustup component add rustfmt && \
-	# Taplo currenlty doesn't have a working docker, we have to build the latest code from the master branch for now
-	# see: https://github.com/tamasfe/taplo/issues/305
-	cargo install --target x86_64-unknown-linux-musl taplo-cli --locked && \
-	git clone https://github.com/tamasfe/taplo.git && \
-	cd taplo && \
-	cargo build -p taplo-cli --release --target x86_64-unknown-linux-musl && \
-	cp target/x86_64-unknown-linux-musl/release/taplo /usr/local/cargo/bin/taplo && \
-	cd .. && \
-	rm -rf taplo
+	rustup component add rustfmt
 
 WORKDIR /usr/src/app
