@@ -23,7 +23,7 @@ ENV RUSTUP_HOME=/usr/local/rustup \
 
 COPY --from=taplo-build /build/taplo /usr/bin/taplo
 
-RUN apk add --no-cache musl-dev libc-dev py3-pip pkgconfig openssl protoc openssl-dev git npm && \
+RUN apk add --no-cache musl-dev libc-dev py3-pip pkgconfig openssl protoc protobuf-dev openssl-dev git npm && \
 	# Add python dependencies
 	pip install flake8==$FLAKE8_VERSION && \
 	pip install flake8-bugbear && \
