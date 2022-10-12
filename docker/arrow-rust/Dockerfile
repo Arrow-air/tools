@@ -1,17 +1,4 @@
-FROM rust:1.63-alpine3.16 AS taplo-build
-
-ARG TAPLO_VERSION=0.7.0
-
-WORKDIR /build
-
-RUN apk add --no-cache musl-dev && \
-    wget https://github.com/tamasfe/taplo/archive/refs/tags/release-taplo-cli-$TAPLO_VERSION.tar.gz && \
-    tar axvf release-taplo-cli-$TAPLO_VERSION.tar.gz && \
-    cd taplo-release-taplo-cli-$TAPLO_VERSION && \
-    cargo build -p taplo-cli --release && \
-    cd .. && \
-    mv taplo-release-taplo-cli-$TAPLO_VERSION/target/release/taplo . && \
-    rm -rf taplo-release-taplo-cli-$TAPLO_VERSION
+FROM tamasfe/taplo:0.7.0-alpine AS taplo
 
 FROM rust:1.63-alpine3.16
 
@@ -21,7 +8,7 @@ ENV RUSTUP_HOME=/usr/local/rustup \
     CARGO_HOME=/usr/local/cargo \
     PATH=/usr/local/cargo/bin:$PATH
 
-COPY --from=taplo-build /build/taplo /usr/bin/taplo
+COPY --from=taplo /usr/bin/taplo /usr/bin/taplo
 
 RUN apk add --no-cache musl-dev libc-dev py3-pip pkgconfig openssl protoc protobuf-dev openssl-dev git npm && \
     # Add python dependencies

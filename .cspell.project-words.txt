@@ -11,3 +11,4 @@ yapf
 clippy
 rustfmt
 eclint
+tamasfe
