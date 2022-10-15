@@ -12,3 +12,5 @@ clippy
 rustfmt
 eclint
 tamasfe
+commitlint
+lintspaces
