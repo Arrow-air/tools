@@ -20,7 +20,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        image: ["arrow-rust"]
+        image: ["arrow-rust", "arrow-sanitychecks"]
 
     steps:
       - name: Checkout repository
