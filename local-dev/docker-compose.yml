@@ -1,0 +1,52 @@
+---
+version: '3.6'
+volumes:
+  cockroachdb:
+  cockroachdb-ssl:
+
+services:
+  cockroachdb-init:
+    extends:
+      file: docker-compose/cockroachdb/svc.yml
+      service: init
+
+  cockroachdb:
+    extends:
+      file: docker-compose/cockroachdb/svc.yml
+      service: server
+    depends_on:
+      cockroachdb-init:
+        condition: service_completed_successfully
+
+  svc-storage:
+    extends:
+      file: docker-compose/storage/svc.yml
+      service: server
+    depends_on:
+      cockroachdb:
+        condition: service_healthy
+
+  svc-scheduler:
+    extends:
+      file: docker-compose/scheduler/svc.yml
+      service: server
+    depends_on:
+      svc-storage:
+        condition: service_healthy
+
+  svc-pricing:
+    extends:
+      file: docker-compose/pricing/svc.yml
+      service: server
+
+  svc-cargo:
+    extends:
+      file: docker-compose/cargo/svc.yml
+      service: server
+    depends_on:
+      svc-storage:
+        condition: service_healthy
+      svc-scheduler:
+        condition: service_healthy
+      svc-pricing:
+        condition: service_healthy

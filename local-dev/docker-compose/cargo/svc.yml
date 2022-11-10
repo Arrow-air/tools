@@ -1,0 +1,24 @@
+---
+version: '3.6'
+
+services:
+  server:
+    container_name: arrow-svc-cargo
+    image: ${CARGO_IMAGE}:${CARGO_TAG}
+    ports:
+      - ${CARGO_PORT_GRPC}:${CARGO_PORT_GRPC}
+      - ${CARGO_PORT_REST}:${CARGO_PORT_REST}
+    healthcheck:
+      test: ["CMD", "grpc_health_probe", "-addr", "localhost:${CARGO_PORT_GRPC}"]
+      interval: 2s
+      timeout: 1s
+      retries: 3
+    environment:
+      - DOCKER_PORT_GRPC=${CARGO_PORT_GRPC}
+      - DOCKER_PORT_REST=${CARGO_PORT_REST}
+      - PRICING_PORT_GRPC
+      - PRICING_HOST_GRPC=svc-pricing
+      - SCHEDULER_PORT_GRPC
+      - SCHEDULER_HOST_GRPC=svc-scheduler
+      - STORAGE_PORT_GRPC
+      - STORAGE_HOST_GRPC=svc-storage
