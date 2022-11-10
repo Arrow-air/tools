@@ -14,3 +14,14 @@ eclint
 tamasfe
 commitlint
 lintspaces
+cockroachdb
+DBNAME
+dockerenv
+healthcheck
+initdb
+microdnf
+nocrypt
+outform
+pkcs
+SSLMODE
+topk
