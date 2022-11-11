@@ -1,0 +1,47 @@
+---
+version: '3.6'
+volumes:
+  cockroachdb:
+  cockroachdb-ssl:
+
+services:
+  init:
+    container_name: arrow-cockroachdb-init
+    image: cockroachdb/cockroach:latest-v22.1
+    volumes:
+      - type: volume
+        source: cockroachdb
+        target: /cockroach/cockroach-data
+      - type: volume
+        source: cockroachdb-ssl
+        target: /cockroach/ssl
+      - type: bind
+        source: scripts/cockroachdb-init.sh
+        target: /scripts/cockroachdb-init.sh
+        read_only: true
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["/scripts/cockroachdb-init.sh"]
+
+  server:
+    container_name: arrow-cockroachdb
+    image: cockroachdb/cockroach:latest-v22.1
+    volumes:
+      - type: bind
+        source: scripts/init.sql
+        target: /docker-entrypoint-initdb.d/init.sql
+      - type: volume
+        source: cockroachdb
+        target: /cockroach/cockroach-data
+      - type: volume
+        source: cockroachdb-ssl
+        target: /cockroach/ssl
+        read_only: true
+    healthcheck:
+      test: "curl -sf http://localhost:8080 > /dev/null"
+      interval: 2s
+      timeout: 1s
+      retries: 3
+    ports:
+      - 26257:26257
+      - 8080:8080
+    command: start-single-node --certs-dir=/cockroach/ssl/certs --advertise-addr=cockroachdb
