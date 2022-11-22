@@ -13,6 +13,9 @@ services:
         source: cockroachdb-ssl
         target: /cockroach/ssl
         read_only: true
+      - type: bind
+        source: log4rs.yaml
+        target: /log4rs.yaml
     ports:
       - ${STORAGE_PORT_GRPC}:${STORAGE_PORT_GRPC}
     healthcheck:
