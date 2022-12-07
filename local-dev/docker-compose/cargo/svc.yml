@@ -8,6 +8,10 @@ services:
     ports:
       - ${CARGO_PORT_GRPC}:${CARGO_PORT_GRPC}
       - ${CARGO_PORT_REST}:${CARGO_PORT_REST}
+    volumes:
+      - type: bind
+        source: log4rs.yaml
+        target: /log4rs.yaml
     healthcheck:
       test: ["CMD", "grpc_health_probe", "-addr", "localhost:${CARGO_PORT_GRPC}"]
       interval: 2s
