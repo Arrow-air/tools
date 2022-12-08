@@ -27,3 +27,5 @@ SSLMODE
 topk
 appenders
 psql
+RUSTFLAGS
+Ctarget
