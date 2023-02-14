@@ -52,6 +52,11 @@ services:
       svc-pricing:
         condition: service_healthy
 
+
+  svc-assets:
+    extends:
+      file: docker-compose/assets/svc.yml
+
   redis:
     extends:
       file: docker-compose/redis/svc.yml
@@ -66,3 +71,4 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+
