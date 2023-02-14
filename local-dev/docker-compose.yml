@@ -3,6 +3,7 @@ version: '3.6'
 volumes:
   cockroachdb:
   cockroachdb-ssl:
+  redis-data:
 
 services:
   cockroachdb-init:
@@ -51,10 +52,23 @@ services:
       svc-pricing:
         condition: service_healthy
 
+
   svc-assets:
     extends:
       file: docker-compose/assets/svc.yml
+
+  redis:
+    extends:
+      file: docker-compose/redis/svc.yml
+      service: server
+
+  svc-telemetry:
+    extends:
+      file: docker-compose/telemetry/svc.yml
       service: server
     depends_on:
       svc-storage:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+

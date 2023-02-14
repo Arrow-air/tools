@@ -29,3 +29,6 @@ appenders
 psql
 RUSTFLAGS
 Ctarget
+loglevel
+flushdb
+flushall
