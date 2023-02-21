@@ -21,18 +21,18 @@ Dependencies are being used, making sure all required services are running in or
 ### Run everything
 To run the services in the background, you can run:
 ```
-docker compose -d up
+docker compose up -d
 ```
 
 ### Run a specific service
 To run a specific service (including it's dependencies), simply run:
 ```
-docker compose -d up svc-<service>
+docker compose up svc-<service> -d 
 ```
 
 example, running the storage service:
 ```
-docker compose -d up svc-storage
+docker compose up svc-storage  -d 
 ```
 
 ### Cleaning up
