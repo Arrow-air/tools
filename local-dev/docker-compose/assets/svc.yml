@@ -3,7 +3,7 @@ version: "3.6"
 
 services:
   server:
-    container_name: arrow-svc-ASSETS
+    container_name: arrow-svc-assets
     image: ${ASSETS_IMAGE}:${ASSETS_TAG}
     ports:
       - ${ASSETS_PORT_GRPC}:${ASSETS_PORT_GRPC}

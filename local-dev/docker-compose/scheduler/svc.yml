@@ -20,3 +20,5 @@ services:
       - DOCKER_PORT_GRPC=${SCHEDULER_PORT_GRPC}
       - STORAGE_PORT_GRPC
       - STORAGE_HOST_GRPC=svc-storage
+      - COMPLIANCE_PORT_GRPC
+      - COMPLIANCE_HOST_GRPC=svc-compliance
