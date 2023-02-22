@@ -27,12 +27,19 @@ services:
       cockroachdb:
         condition: service_healthy
 
+  svc-compliance:
+    extends:
+      file: docker-compose/compliance/svc.yml
+      service: server
+
   svc-scheduler:
     extends:
       file: docker-compose/scheduler/svc.yml
       service: server
     depends_on:
       svc-storage:
+        condition: service_healthy
+      svc-compliance:
         condition: service_healthy
 
   svc-pricing:
