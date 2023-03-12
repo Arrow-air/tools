@@ -2,7 +2,6 @@ FROM tamasfe/taplo:0.8.0-alpine AS taplo
 
 FROM --platform=$TARGETPLATFORM rust:1.63-alpine3.16
 
-ARG FLAKE8_VERSION=5.0.4
 
 ENV RUSTUP_HOME=/usr/local/rustup \
     CARGO_HOME=/usr/local/cargo \
@@ -12,10 +11,8 @@ COPY --from=taplo /usr/bin/taplo /usr/bin/taplo
 
 RUN apk add --no-cache py3-pip openssl npm git && \
     # Add python dependencies
-    pip install flake8==$FLAKE8_VERSION && \
-    pip install flake8-bugbear && \
-    pip install --ignore-installed flake8-black && \
-    pip install yapf && \
+    pip install autopep8 && \
+    pip install pycodestyle && \
     # Add cspell dependencies
     npm install -g cspell && \
     npm install -g @cspell/dict-rust && \
