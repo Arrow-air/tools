@@ -32,3 +32,4 @@ Ctarget
 loglevel
 flushdb
 flushall
+aarch
