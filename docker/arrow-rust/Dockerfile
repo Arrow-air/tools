@@ -9,7 +9,8 @@ RUN apk add --no-cache musl-dev libc-dev pkgconfig openssl \
     # Add rust dependencies
     rustup target add x86_64-unknown-linux-musl && \
     rustup component add clippy && \
-    rustup component add rustfmt
+    rustup component add rustfmt && \
+    rustup update
 
 ENV RUSTFLAGS="-Ctarget-feature=-crt-static"
 RUN cargo install cargo-tarpaulin
