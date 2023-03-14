@@ -63,7 +63,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}},value=${{steps.dotenv.outputs.version}}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: docker/${{ matrix.image }}/
           push: ${{ github.event_name != 'pull_request' }}
