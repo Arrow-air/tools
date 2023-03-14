@@ -1,8 +1,14 @@
-FROM rust:1.66-alpine3.16
+FROM rust:1.68-alpine
 
+ARG TARGETOS
+ARG TARGETARCH
+
+ENV BUILDX_ARCH="${TARGETOS:-linux}-${TARGETARCH:-amd64}"
 ENV RUSTUP_HOME=/usr/local/rustup \
     CARGO_HOME=/usr/local/cargo \
     PATH=/usr/local/cargo/bin:$PATH
+
+RUN echo "Building for $BUILDX_ARCH"
 
 RUN apk add --no-cache musl-dev libc-dev pkgconfig openssl \
     protoc protobuf-dev openssl-dev git perl make && \
