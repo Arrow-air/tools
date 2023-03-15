@@ -34,3 +34,4 @@ flushdb
 flushall
 autopep
 pycodestyle
+aarch

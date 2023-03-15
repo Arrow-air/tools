@@ -1,18 +1,27 @@
-FROM rust:1.66-alpine3.16
+FROM rust:1.68-alpine
 
+ARG TARGETOS
+ARG TARGETARCH
+
+ENV BUILDX_ARCH="${TARGETOS:-linux}-${TARGETARCH:-amd64}"
 ENV RUSTUP_HOME=/usr/local/rustup \
     CARGO_HOME=/usr/local/cargo \
     PATH=/usr/local/cargo/bin:$PATH
 
+RUN echo "Building for $BUILDX_ARCH"
+
 RUN apk add --no-cache musl-dev libc-dev pkgconfig openssl \
     protoc protobuf-dev openssl-dev git perl make && \
+    # Check target architecture
+    if [ "$BUILDX_ARCH" = "linux-arm64" ]; then ARCHITECTURE=aarch64-unknown-linux-musl; else ARCHITECTURE=x86_64-unknown-linux-musl; fi && \
     # Add rust dependencies
-    rustup target add x86_64-unknown-linux-musl && \
+    rustup target add ${ARCHITECTURE} && \
     rustup component add clippy && \
-    rustup component add rustfmt
-
-ENV RUSTFLAGS="-Ctarget-feature=-crt-static"
-RUN cargo install cargo-tarpaulin
-ENV RUSTFLAGS=
+    rustup component add rustfmt && \
+    # Use binary install for tarpaulin to bypass build OOM error
+    wget https://github.com/xd009642/tarpaulin/releases/download/0.25.1/cargo-tarpaulin-${ARCHITECTURE}.tar.gz && \
+    tar axvf cargo-tarpaulin-${ARCHITECTURE}.tar.gz && \
+    mv cargo-tarpaulin $CARGO_HOME/bin/ && \
+    rm cargo-tarpaulin-${ARCHITECTURE}.tar.gz
 
 WORKDIR /usr/src/app
