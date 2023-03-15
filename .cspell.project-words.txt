@@ -32,4 +32,6 @@ Ctarget
 loglevel
 flushdb
 flushall
+autopep
+pycodestyle
 aarch
