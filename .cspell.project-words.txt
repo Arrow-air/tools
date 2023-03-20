@@ -37,3 +37,6 @@ pycodestyle
 aarch
 eabi
 stlink
+adduser
+TFENV
+tfenv
