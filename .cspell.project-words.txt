@@ -40,3 +40,5 @@ stlink
 adduser
 TFENV
 tfenv
+libusb
+udev

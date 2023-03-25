@@ -7,6 +7,8 @@ RUN apt-get update && \
     wget \
     curl \
     git \
+    libusb-dev \
+    udev \
     stlink-tools \
     cmake
 
@@ -26,5 +28,6 @@ ENV STM32_TOOLCHAIN_PATH=${STM32_LIB_PATH}/gcc-arm-none-eabi-${ARM_RELEASE}/bin
 ENV STM32_TARGET_TRIPLET=arm-none-eabi
 ENV STM32_CUBE_F4_PATH=${STM32_LIB_PATH}/STM32CubeF4
 ENV STM32_CUBE_H7_PATH=${STM32_LIB_PATH}/STM32CubeH7
+ENV PATH=$PATH:${STM32_TOOLCHAIN_PATH}
 
 WORKDIR /usr/src/app
