@@ -6,7 +6,7 @@ ENV TFENV_AUTO_INSTALL=true
 ENV USER=tfenv
 ENV PATH "/home/$USER/.tfenv/bin:$PATH"
 
-RUN apk add --no-cache bash curl
+RUN apk add --no-cache bash curl git
 
 RUN adduser -D "$USER"
 USER "$USER"
