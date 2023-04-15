@@ -42,3 +42,5 @@ TFENV
 tfenv
 libusb
 udev
+gmake
+newlib
