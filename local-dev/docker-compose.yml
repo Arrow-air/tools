@@ -19,6 +19,16 @@ services:
       cockroachdb-init:
         condition: service_completed_successfully
 
+  redis:
+    extends:
+      file: docker-compose/redis/svc.yml
+      service: server
+
+  rabbitmq:
+    extends:
+      file: docker-compose/rabbitmq/svc.yml
+      service: server
+
   svc-storage:
     extends:
       file: docker-compose/storage/svc.yml
@@ -67,11 +77,6 @@ services:
       svc-storage:
         condition: service_healthy
 
-  redis:
-    extends:
-      file: docker-compose/redis/svc.yml
-      service: server
-
   svc-telemetry:
     extends:
       file: docker-compose/telemetry/svc.yml
@@ -80,5 +85,7 @@ services:
       svc-storage:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
 

@@ -24,3 +24,5 @@ services:
       - STORAGE_HOST_GRPC=svc-storage
       - REDIS_HOST
       - REDIS_PORT
+      - RABBITMQ_HOST
+      - RABBITMQ_PORT
