@@ -4,6 +4,7 @@ volumes:
   cockroachdb:
   cockroachdb-ssl:
   redis-data:
+  rabbitmq-data:
 
 services:
   cockroachdb-init:
@@ -88,4 +89,3 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-

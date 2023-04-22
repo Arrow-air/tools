@@ -8,16 +8,16 @@ services:
     container_name: arrow-rabbitmq
     image: rabbitmq:3.11-alpine
     restart: always
-    expose:
-      - ${RABBITMQ_PORT}
-    command: rabbitmq-server --save 20 1 --loglevel warning --port ${RABBITMQ_PORT}
+    ports:
+      - 5672:5672
+      - 15672:15672
+    command: rabbitmq-server
     healthcheck:
-      test: ["CMD", "rabbitmq-cli","ping"]
-      interval: 2s
-      timeout: 1s
+      test: ["CMD", "rabbitmq-diagnostics","ping"]
+      interval: 10s
+      timeout: 3s
       retries: 3
     volumes:
       - rabbitmq-data:/data
     environment:
-      - RABBITMQ_NODE_PORT=${RABBITMQ_PORT}
-      - RABBITMQ_NODENAME=${RABBITMQ_HOST}
+      - RABBITMQ_NODENAME
