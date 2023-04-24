@@ -1,0 +1,23 @@
+---
+version: '3.6'
+volumes:
+  rabbitmq-data:
+
+services:
+  server:
+    container_name: arrow-rabbitmq
+    image: rabbitmq:3.11-alpine
+    restart: always
+    ports:
+      - 5672:5672
+      - 15672:15672
+    command: rabbitmq-server
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics","ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    volumes:
+      - rabbitmq-data:/data
+    environment:
+      - RABBITMQ_NODENAME

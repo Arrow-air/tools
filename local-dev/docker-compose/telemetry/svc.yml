@@ -18,9 +18,13 @@ services:
       timeout: 1s
       retries: 3
     environment:
-      - DOCKER_PORT_GRPC=${TELEMETRY_PORT_GRPC}
-      - DOCKER_PORT_REST=${TELEMETRY_PORT_REST}
-      - STORAGE_PORT_GRPC
+      - REDIS__URL
+      - REDIS__POOL__MAX_SIZE
+      - REDIS__POOL__TIMEOUTS__WAIT__SECS
+      - REDIS__POOL__TIMEOUTS__WAIT__NANOS
       - STORAGE_HOST_GRPC=svc-storage
-      - REDIS_HOST
-      - REDIS_PORT
+      - STORAGE_PORT_GRPC
+      - RABBITMQ_NODENAME
+      - DOCKER_PORT_REST=${TELEMETRY_PORT_REST}
+      - DOCKER_PORT_GRPC=${TELEMETRY_PORT_GRPC}
+      - LOG_CONFIG=log4rs.yaml

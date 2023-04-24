@@ -44,3 +44,5 @@ libusb
 udev
 gmake
 newlib
+nanos
+rabbitmq

@@ -4,6 +4,7 @@ volumes:
   cockroachdb:
   cockroachdb-ssl:
   redis-data:
+  rabbitmq-data:
 
 services:
   cockroachdb-init:
@@ -18,6 +19,16 @@ services:
     depends_on:
       cockroachdb-init:
         condition: service_completed_successfully
+
+  redis:
+    extends:
+      file: docker-compose/redis/svc.yml
+      service: server
+
+  rabbitmq:
+    extends:
+      file: docker-compose/rabbitmq/svc.yml
+      service: server
 
   svc-storage:
     extends:
@@ -67,11 +78,6 @@ services:
       svc-storage:
         condition: service_healthy
 
-  redis:
-    extends:
-      file: docker-compose/redis/svc.yml
-      service: server
-
   svc-telemetry:
     extends:
       file: docker-compose/telemetry/svc.yml
@@ -81,4 +87,5 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-
+      rabbitmq:
+        condition: service_healthy

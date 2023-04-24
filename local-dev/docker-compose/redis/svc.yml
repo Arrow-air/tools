@@ -8,9 +8,9 @@ services:
     container_name: arrow-redis
     image: redis:6.2-alpine
     restart: always
-    expose:
-      - ${REDIS_PORT}
-    command: redis-server --save 20 1 --loglevel warning --port ${REDIS_PORT}
+    ports:
+      - 6379:6379
+    command: redis-server --save 20 1 --loglevel warning
     healthcheck:
       test: ["CMD", "redis-cli","ping"]
       interval: 2s
@@ -21,4 +21,3 @@ services:
     environment:
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL,CONFIG
       - ALLOW_EMPTY_PASSWORD=yes
-      - REDIS_PORT_NUMBER=${REDIS_PORT}
