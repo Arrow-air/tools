@@ -46,3 +46,7 @@ gmake
 newlib
 nanos
 rabbitmq
+postgis
+pgrouting
+xvzf
+
