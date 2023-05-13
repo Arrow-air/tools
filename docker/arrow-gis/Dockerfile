@@ -1,12 +1,14 @@
 FROM postgis/postgis:13-3.3-alpine
-RUN apk add --no-cache --virtual .build-deps \
+RUN apk add --no-cache \
     cmake \
     make \
     g++ \
     boost-dev \
     git \
     postgresql-dev \
-    perl
+    perl \
+    openssl \
+    openssl-dev
 
 RUN wget -O pgrouting.tar.gz https://github.com/pgRouting/pgrouting/archive/v3.1.4.tar.gz
 RUN tar -xvzf pgrouting.tar.gz
@@ -17,5 +19,4 @@ RUN cd pgrouting-* \
     && make \
     && make install \
     && cd ../.. \
-    && rm -rf pgrouting* \
-    && apk del .build-deps
+    && rm -rf pgrouting*
