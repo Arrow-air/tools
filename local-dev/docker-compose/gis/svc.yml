@@ -1,0 +1,31 @@
+---
+version: '3.6'
+
+services:
+  server:
+    container_name: arrow-svc-gis
+    image: ${GIS_IMAGE}:${GIS_TAG}
+    ports:
+      - ${GIS_PORT_GRPC}:${GIS_PORT_GRPC}
+      - ${GIS_PORT_REST}:${GIS_PORT_REST}
+    volumes:
+      - type: bind
+        source: log4rs.yaml
+        target: /log4rs.yaml
+    healthcheck:
+      test: ["CMD", "grpc_health_probe", "-addr", "localhost:${GIS_PORT_GRPC}"]
+      interval: 2s
+      timeout: 1s
+      retries: 3
+    environment:
+      - PG__USER
+      - PG__DBNAME
+      - PG__HOST
+      - PG__PORT
+      - PG__SSLMODE
+      - DB_CA_CERT
+      - DB_CLIENT_CERT
+      - DB_CLIENT_KEY
+      - DOCKER_PORT_GRPC
+      - LOG_CONFIG
+      - DOCKER_PORT_GRPC=${GIS_PORT_GRPC}
