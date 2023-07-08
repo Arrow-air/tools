@@ -1,0 +1,57 @@
+---
+version: '3.6'
+volumes:
+  postgis-data:
+  postgis-ssl:
+
+services:
+  init:
+    container_name: arrow-postgis-init
+    image: ghcr.io/arrow-air/tools/arrow-gis:1.0
+    volumes:
+      - type: volume
+        source: postgis-data
+        target: /var/lib/postgresql
+      - type: volume
+        source: postgis-ssl
+        target: /ssl
+      - type: bind
+        source: scripts/postgis-init.sh
+        target: /scripts/postgis-init.sh
+        read_only: true
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["/scripts/postgis-init.sh"]
+    environment:
+      - UID=postgres
+      - GID=1001
+
+  server:
+    container_name: arrow-postgis
+    image: ghcr.io/arrow-air/tools/arrow-gis:1.0
+    restart: always
+    user: "postgres:1001"
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: "pg_isready -d gis -h localhost -p 5432 -U svc_gis"
+      interval: 2s
+      timeout: 10s
+      retries: 3
+    volumes:
+      - type: volume
+        source: postgis-data
+        target: /var/lib/postgresql
+      - type: volume
+        source: postgis-ssl
+        target: /ssl
+        read_only: true
+      - type: bind
+        source: scripts/init.sql
+        target: /docker-entrypoint-initdb.d/init.sql
+    environment:
+        - POSTGRES_HOST_AUTH_METHOD=trust # TODO(R3) - Fix, unsafe
+    command: >
+      -c ssl=true
+      -c ssl_ca_file=${GIS_DB_CA_CERT}
+      -c ssl_cert_file=${GIS_DB_CLIENT_CERT}
+      -c ssl_key_file=${GIS_DB_CLIENT_KEY}

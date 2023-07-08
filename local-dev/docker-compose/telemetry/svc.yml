@@ -11,7 +11,7 @@ services:
     volumes:
       - type: bind
         source: log4rs.yaml
-        target: /log4rs.yaml
+        target: /usr/src/app/log4rs.yaml
     healthcheck:
       test: ["CMD", "grpc_health_probe", "-addr", "localhost:${TELEMETRY_PORT_GRPC}"]
       interval: 2s
@@ -19,12 +19,24 @@ services:
       retries: 3
     environment:
       - REDIS__URL
-      - REDIS__POOL__MAX_SIZE
-      - REDIS__POOL__TIMEOUTS__WAIT__SECS
-      - REDIS__POOL__TIMEOUTS__WAIT__NANOS
+      - REDIS__POOL__MAX_SIZE=16
+      - REDIS__POOL__TIMEOUTS__WAIT__SECS=2
+      - REDIS__POOL__TIMEOUTS__WAIT__NANOS=0
       - STORAGE_HOST_GRPC=svc-storage
       - STORAGE_PORT_GRPC
-      - RABBITMQ_NODENAME
+      - GIS_PORT_GRPC
+      - GIS_HOST_GRPC=svc-gis
       - DOCKER_PORT_REST=${TELEMETRY_PORT_REST}
       - DOCKER_PORT_GRPC=${TELEMETRY_PORT_GRPC}
-      - LOG_CONFIG=log4rs.yaml
+      - AMQP__URL
+      - AMQP__POOL__MAX_SIZE=16
+      - AMQP__POOL__TIMEOUTS__WAIT__SECS=2
+      - AMQP__POOL__TIMEOUTS__WAIT__NANOS=0
+      - LOG_CONFIG
+      - RINGBUFFER_SIZE_BYTES=4096
+      - GIS_PUSH_CADENCE_MS=50
+      - GIS_MAX_MESSAGE_SIZE_BYTES=2048
+      - REST_REQUEST_LIMIT_PER_SECOND=100
+      - REST_CONCURRENCY_LIMIT_PER_SERVICE=5
+      - REST_CORS_ALLOWED_ORIGIN
+      - LOG_CONFIG=/usr/src/app/log4rs.yaml

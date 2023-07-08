@@ -5,12 +5,14 @@ volumes:
   cockroachdb-ssl:
   redis-data:
   rabbitmq-data:
+  postgis-ssl:
+  postgis-data:
 
 services:
   cockroachdb-init:
     extends:
       file: docker-compose/cockroachdb/svc.yml
-      service: init
+      service: cockroachdb-init
 
   cockroachdb:
     extends:
@@ -30,6 +32,19 @@ services:
       file: docker-compose/rabbitmq/svc.yml
       service: server
 
+  postgis-init:
+    extends:
+      file: docker-compose/postgis/svc.yml
+      service: init
+
+  postgis:
+    extends:
+      file: docker-compose/postgis/svc.yml
+      service: server
+    depends_on:
+      postgis-init:
+        condition: service_completed_successfully
+
   svc-storage:
     extends:
       file: docker-compose/storage/svc.yml
@@ -42,6 +57,9 @@ services:
     extends:
       file: docker-compose/compliance/svc.yml
       service: server
+    depends_on:
+      svc-gis:
+        condition: service_healthy
 
   svc-scheduler:
     extends:
@@ -78,6 +96,14 @@ services:
       svc-storage:
         condition: service_healthy
 
+  svc-gis:
+    extends:
+      file: docker-compose/gis/svc.yml
+      service: server
+    depends_on:
+      postgis:
+        condition: service_healthy
+
   svc-telemetry:
     extends:
       file: docker-compose/telemetry/svc.yml
@@ -88,4 +114,14 @@ services:
       redis:
         condition: service_healthy
       rabbitmq:
+        condition: service_healthy
+      svc-gis:
+        condition: service_healthy
+
+  svc-atc:
+    extends:
+      file: docker-compose/atc/svc.yml
+      service: server
+    depends_on:
+      svc-storage:
         condition: service_healthy

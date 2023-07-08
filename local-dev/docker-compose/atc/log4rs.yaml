@@ -7,7 +7,7 @@ appenders:
       pattern: "{d(%Y-%m-%d %H:%M:%S)} | {({l}):5.5} | {f}:{L} — {m}{n}"
   grpc_requests:
     kind: rolling_file
-    path: "logs/grpc_requests.log"
+    path: "log/grpc_requests.log"
     policy:
       trigger:
         kind: size
@@ -21,7 +21,7 @@ appenders:
       kind: json
   rest_requests:
     kind: rolling_file
-    path: "logs/rest_requests.log"
+    path: "log/rest_requests.log"
     policy:
       trigger:
         kind: size
@@ -33,18 +33,20 @@ appenders:
         base: 1
     encoder:
       kind: json
-  backend_requests:
+  common:
     kind: rolling_file
-    path: "logs/backend_requests.log"
+    path: "log/common.log"
     policy:
       trigger:
         kind: size
         limit: 20mb
       roller:
         kind: fixed_window
-        pattern: logs/backend_requests_{}.gz
+        pattern: logs/common_{}.gz
         count: 5
         base: 1
+    encoder:
+      kind: json
 
 root:
   level: info
@@ -52,14 +54,6 @@ root:
     - stdout
 
 loggers:
-  backend::cache:
-    level: debug
-    appenders:
-      - backend_requests
-  backend::amqp:
-    level: debug
-    appenders:
-      - backend_requests
   app::grpc:
     level: info
     appenders:
@@ -68,3 +62,7 @@ loggers:
     level: info
     appenders:
       - rest_requests
+  app::common:
+    level: info
+    appenders:
+      - common

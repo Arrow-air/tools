@@ -1,0 +1,24 @@
+---
+version: '3.6'
+
+services:
+  server:
+    container_name: arrow-svc-atc
+    image: ${ATC_IMAGE}:${ATC_TAG}
+    ports:
+      - ${ATC_PORT_REST}:${ATC_PORT_REST}
+      - ${ATC_PORT_GRPC}:${ATC_PORT_GRPC}
+    healthcheck:
+      test: ["CMD", "grpc_health_probe", "-addr", "localhost:${ATC_PORT_GRPC}"]
+      interval: 2s
+      timeout: 1s
+      retries: 3
+    volumes:
+      - type: bind
+        source: log4rs.yaml
+        target: /log4rs.yaml
+    environment:
+      - DOCKER_PORT_GRPC=${ATC_PORT_GRPC}
+      - DOCKER_PORT_REST=${ATC_PORT_REST}
+      - STORAGE_PORT_GRPC
+      - STORAGE_HOST_GRPC=svc-storage
