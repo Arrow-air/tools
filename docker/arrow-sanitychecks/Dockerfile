@@ -1,6 +1,6 @@
-FROM tamasfe/taplo:0.8.0-alpine AS taplo
+FROM tamasfe/taplo:0.8.1-alpine AS taplo
 
-FROM --platform=$TARGETPLATFORM rust:1.63-alpine3.16
+FROM --platform=$TARGETPLATFORM rust:1.73-alpine
 
 
 ENV RUSTUP_HOME=/usr/local/rustup \
