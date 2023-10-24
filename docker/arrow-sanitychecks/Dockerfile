@@ -8,6 +8,7 @@ ENV RUSTUP_HOME=/usr/local/rustup \
     PATH=/usr/local/cargo/bin:$PATH
 
 COPY --from=taplo /usr/bin/taplo /usr/bin/taplo
+COPY ./release_checklist.py /usr/bin/release_checklist.py
 
 RUN apk add --no-cache py3-pip openssl npm git && \
     # Add python dependencies
