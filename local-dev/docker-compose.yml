@@ -3,8 +3,15 @@ version: '3.6'
 volumes:
   cockroachdb:
   cockroachdb-ssl:
+  postgis-data:
+  postgis-ssl:
   redis-data:
   rabbitmq-data:
+configs:
+  log4rs:
+    file: log4rs.yaml
+  dot-env:
+    file: .env
 
 services:
   cockroachdb-init:
@@ -20,6 +27,27 @@ services:
       cockroachdb-init:
         condition: service_completed_successfully
 
+  arrow-gis-init-ssl:
+    extends:
+      file: docker-compose/arrow-gis/svc.yml
+      service: init-ssl
+
+  arrow-gis-init:
+    extends:
+      file: docker-compose/arrow-gis/svc.yml
+      service: init
+    depends_on:
+      arrow-gis-init-ssl:
+        condition: service_completed_successfully
+
+  arrow-gis:
+    extends:
+      file: docker-compose/arrow-gis/svc.yml
+      service: server
+    depends_on:
+      arrow-gis-init:
+        condition: service_completed_successfully
+
   redis:
     extends:
       file: docker-compose/redis/svc.yml
@@ -31,36 +59,95 @@ services:
       service: server
 
   svc-storage:
+    image: ${STORAGE_IMAGE}:${STORAGE_TAG}
+    container_name: arrow-svc-storage
     extends:
-      file: docker-compose/storage/svc.yml
+      file: docker-compose/arrow-svc.yml
       service: server
     depends_on:
       cockroachdb:
         condition: service_healthy
+    volumes:
+      - type: volume
+        source: cockroachdb-ssl
+        target: /cockroach/ssl
+        read_only: true
+    command: --rebuild-psql=true  --init-psql=true
+    environment:
+      - PG__USER=svc_storage
+      - PG__DBNAME=arrow
+      - PG__HOST=cockroachdb
+      - PG__PORT=26257
+      - PG__SSLMODE=require
+      - DB_CA_CERT=/cockroach/ssl/certs/ca.crt
+      - DB_CLIENT_CERT=/cockroach/ssl/certs/client.svc_storage.crt
+      - DB_CLIENT_KEY=/cockroach/ssl/certs/client.svc_storage.key.pk8
 
-  svc-compliance:
+  svc-gis:
+    image: ${GIS_IMAGE}:${GIS_TAG}
+    container_name: arrow-svc-gis
     extends:
-      file: docker-compose/compliance/svc.yml
-      service: server
-
-  svc-scheduler:
-    extends:
-      file: docker-compose/scheduler/svc.yml
+      file: docker-compose/arrow-svc.yml
       service: server
     depends_on:
+      arrow-gis:
+        condition: service_healthy
+    volumes:
+      - type: volume
+        source: postgis-ssl
+        target: /ssl
+        read_only: true
+    environment:
+      - PG__USER=svc_gis
+      - PG__DBNAME=gis
+      - PG__HOST=arrow-gis
+      - PG__PORT=5432
+      - PG__SSLMODE=require
+      - DB_CA_CERT=/ssl/certs/root.crt
+      - DB_CLIENT_CERT=/ssl/certs/client.svc_gis.crt
+      - DB_CLIENT_KEY=/ssl/keys/client.svc_gis.key.pk8
+
+  svc-compliance:
+    image: ${COMPLIANCE_IMAGE}:${COMPLIANCE_TAG}
+    container_name: arrow-svc-compliance
+    extends:
+      file: docker-compose/arrow-svc.yml
+      service: server
+    depends_on:
+      svc-gis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - INTERVAL_SECONDS_REFRESH_WAYPOINTS=30
+      - INTERVAL_SECONDS_REFRESH_ZONES=30
+
+  svc-scheduler:
+    image: ${SCHEDULER_IMAGE}:${SCHEDULER_TAG}
+    container_name: arrow-svc-scheduler
+    extends:
+      file: docker-compose/arrow-svc.yml
+      service: server
+    depends_on:
+      svc-gis:
+        condition: service_healthy
       svc-storage:
         condition: service_healthy
       svc-compliance:
         condition: service_healthy
 
   svc-pricing:
+    image: ${PRICING_IMAGE}:${PRICING_TAG}
+    container_name: arrow-svc-pricing
     extends:
-      file: docker-compose/pricing/svc.yml
+      file: docker-compose/arrow-svc.yml
       service: server
 
   svc-cargo:
+    image: ${CARGO_IMAGE}:${CARGO_TAG}
+    container_name: arrow-svc-cargo
     extends:
-      file: docker-compose/cargo/svc.yml
+      file: docker-compose/arrow-svc.yml
       service: server
     depends_on:
       svc-storage:
@@ -69,23 +156,43 @@ services:
         condition: service_healthy
       svc-pricing:
         condition: service_healthy
+    environment:
+      - REQUEST_LIMIT_PER_SECOND=$REST_REQUEST_LIMIT_PER_SECOND
 
   svc-assets:
+    image: ${ASSETS_IMAGE}:${ASSETS_TAG}
+    container_name: arrow-svc-assets
     extends:
-      file: docker-compose/assets/svc.yml
+      file: docker-compose/arrow-svc.yml
+      service: server
+    depends_on:
+      svc-storage:
+        condition: service_healthy
+
+  svc-atc:
+    image: ${ATC_IMAGE}:${ATC_TAG}
+    container_name: arrow-svc-atc
+    extends:
+      file: docker-compose/arrow-svc.yml
       service: server
     depends_on:
       svc-storage:
         condition: service_healthy
 
   svc-telemetry:
+    image: ${TELEMETRY_IMAGE}:${TELEMETRY_TAG}
+    container_name: arrow-svc-telemetry
     extends:
-      file: docker-compose/telemetry/svc.yml
+      file: docker-compose/arrow-svc.yml
       service: server
     depends_on:
+      svc-gis:
+        condition: service_healthy
       svc-storage:
         condition: service_healthy
       redis:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+    environment:
+      - GIS_PUSH_CADENCE_MS=5000
