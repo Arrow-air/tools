@@ -8,7 +8,8 @@ RUN apk add --no-cache \
     postgresql-dev \
     perl \
     openssl \
-    openssl-dev
+    openssl-dev \
+    sfcgal-dev
 
 RUN wget -O pgrouting.tar.gz https://github.com/pgRouting/pgrouting/archive/v3.1.4.tar.gz
 RUN tar -xvzf pgrouting.tar.gz
