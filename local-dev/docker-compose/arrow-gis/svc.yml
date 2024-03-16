@@ -70,10 +70,9 @@ services:
         read_only: true
     healthcheck:
       test: "pg_isready -d gis -p 5432 -U svc_gis"
-      interval: 2s
-      timeout: 10s
+      interval: 10s
+      timeout: 30s
       retries: 3
-      start_period: 120s
     ports:
       - 5432:5432
     environment:

@@ -130,8 +130,8 @@ loggers:
     level: debug
     appenders:
       - router
-  app::postgis:
-    level: info
+  backend::postgis:
+    level: debug
     appenders:
       - postgis
   test::ut:

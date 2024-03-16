@@ -35,7 +35,7 @@ if [ ! -f "${CERT_DIR}/root.crt" ]; then
 	# Create Root CA Request
 	openssl req -new -nodes -text -out ${CERT_DIR}/root.csr \
 	-keyout ${KEY_DIR}/root.key \
-	-subj "/CN=localhost"
+	-subj "/CN=svc-gis"
 
 	printf "%s\n" "Signing root certificate request...."
 

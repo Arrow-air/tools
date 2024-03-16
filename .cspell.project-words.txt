@@ -88,3 +88,5 @@ Vertiport
 vertiport
 Vertiports
 vertiports
+extname
+extrelocatable

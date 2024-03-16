@@ -92,6 +92,8 @@ services:
     depends_on:
       arrow-gis:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     volumes:
       - type: volume
         source: postgis-ssl
@@ -182,6 +184,8 @@ services:
   svc-telemetry:
     image: ${TELEMETRY_IMAGE}:${TELEMETRY_TAG}
     container_name: arrow-svc-telemetry
+    ports:
+      - ${TELEMETRY_HOST_PORT_REST}:8000
     extends:
       file: docker-compose/arrow-svc.yml
       service: server
@@ -196,3 +200,17 @@ services:
         condition: service_healthy
     environment:
       - GIS_PUSH_CADENCE_MS=5000
+
+  svc-discovery:
+    image: ${DISCOVERY_IMAGE}:${DISCOVERY_TAG}
+    container_name: arrow-svc-discovery
+    ports:
+      - ${DISCOVERY_HOST_PORT_REST}:8000
+    extends:
+      file: docker-compose/arrow-svc.yml
+      service: server
+    depends_on:
+      svc-gis:
+        condition: service_healthy
+      svc-telemetry:
+        condition: service_healthy
