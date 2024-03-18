@@ -7,7 +7,7 @@ RUN apk update
 RUN apk add --no-cache --update bash curl git g++ musl-dev make \
     libftdi1-dev clang bison flex-dev gperf readline-dev \
     gawk tcl-dev libffi-dev eigen-dev \
-    graphviz python3 libftdi1-dev gcc-gnat \
+    graphviz python3 libftdi1-dev gcc-gnat llvm16-dev \
     qt5-qtbase python3-dev boost-dev cmake
 
 # To use VHDL with yosys, require ghdl plugin
@@ -21,7 +21,7 @@ RUN git clone https://github.com/YosysHQ/nextpnr nextpnr
 
 # Install all
 RUN cd yosys; make -j$(nproc); make install
-RUN cd ghdl; ./configure --prefix=/usr/local; make -j$(nproc); make install
+RUN cd ghdl; ./configure --with-llvm-config --prefix=/usr/local; make -j$(nproc); make install
 RUN cd ghdl-yosys-plugin; make -j$(nproc); make install
 RUN cd icestorm; make -j$(nproc); make install
 RUN cd nextpnr; \
