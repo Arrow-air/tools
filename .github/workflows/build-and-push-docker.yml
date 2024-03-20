@@ -70,6 +70,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}/${{ matrix.image }}
           tags: |
+            type=edge,branch=main
             type=ref,event=branch
             type=ref,event=pr
             type=semver,pattern={{version}},value=${{steps.dotenv.outputs.version}}

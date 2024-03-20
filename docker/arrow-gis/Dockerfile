@@ -1,4 +1,4 @@
-FROM postgis/postgis:13-3.3-alpine
+FROM postgis/postgis:15-3.3-alpine
 RUN apk add --no-cache \
     cmake \
     make \
@@ -11,9 +11,9 @@ RUN apk add --no-cache \
     openssl-dev \
     sfcgal-dev
 
-RUN wget -O pgrouting.tar.gz https://github.com/pgRouting/pgrouting/archive/v3.1.4.tar.gz
-RUN tar -xvzf pgrouting.tar.gz
-RUN cd pgrouting-* \
+RUN wget -O pgrouting-3.5.0.tar.gz https://github.com/pgRouting/pgrouting/archive/v3.5.0.tar.gz \
+    && tar -xvzf pgrouting-3.5.0.tar.gz \
+    && cd pgrouting-* \
     && mkdir build \
     && cd build \
     && cmake .. \
