@@ -135,8 +135,6 @@ services:
         condition: service_healthy
       svc-storage:
         condition: service_healthy
-      svc-compliance:
-        condition: service_healthy
 
   svc-pricing:
     image: ${PRICING_IMAGE}:${PRICING_TAG}
@@ -151,6 +149,8 @@ services:
     extends:
       file: docker-compose/arrow-svc.yml
       service: server
+    ports:
+      - ${CARGO_HOST_PORT_REST}:8000
     depends_on:
       svc-storage:
         condition: service_healthy
@@ -158,12 +158,26 @@ services:
         condition: service_healthy
       svc-pricing:
         condition: service_healthy
+      svc-contact:
+        condition: service_healthy
     environment:
       - REQUEST_LIMIT_PER_SECOND=$REST_REQUEST_LIMIT_PER_SECOND
 
   svc-assets:
     image: ${ASSETS_IMAGE}:${ASSETS_TAG}
     container_name: arrow-svc-assets
+    extends:
+      file: docker-compose/arrow-svc.yml
+      service: server
+    depends_on:
+      svc-storage:
+        condition: service_healthy
+
+  svc-contact:
+    image: ${CONTACT_IMAGE}:${CONTACT_TAG}
+    container_name: arrow-svc-contact
+    ports:
+      - ${CONTACT_HOST_PORT_REST}:8000
     extends:
       file: docker-compose/arrow-svc.yml
       service: server
@@ -213,4 +227,24 @@ services:
       svc-gis:
         condition: service_healthy
       svc-telemetry:
+        condition: service_healthy
+
+  svc-itest:
+    image: ${ITEST_IMAGE}:${ITEST_TAG}
+    container_name: arrow-svc-itest
+    ports:
+      - ${ITEST_HOST_PORT_REST}:8000
+    extends:
+      file: docker-compose/arrow-svc.yml
+      service: server
+    depends_on:
+      svc-telemetry:
+        condition: service_healthy
+      svc-cargo:
+        condition: service_healthy
+      svc-gis:
+        condition: service_healthy
+      svc-storage:
+        condition: service_healthy
+      svc-compliance:
         condition: service_healthy
