@@ -24,7 +24,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        image: ["arrow-rust", "arrow-sanitychecks", "arrow-stm32", "arrow-tfenv", "arrow-gis", "arrow-icestorm"]
+        image: ["arrow-rust", "arrow-sanitychecks", "arrow-stm32", "arrow-tfenv", "arrow-tenv", "arrow-gis", "arrow-icestorm"]
 
     steps:
       - name: Checkout repository
