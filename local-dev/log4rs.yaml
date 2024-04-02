@@ -129,7 +129,7 @@ loggers:
     appenders:
       - backend_requests
   backend::tasks:
-    level: debug
+    level: info
     appenders:
       - tasks
   app::grpc:
@@ -141,15 +141,15 @@ loggers:
     appenders:
       - grpc_clients
   app::rest:
-    level: debug
+    level: info
     appenders:
       - rest_requests
   app::router:
-    level: debug
+    level: info
     appenders:
       - router
   backend::postgis:
-    level: debug
+    level: info
     appenders:
       - postgis
   test::ut:

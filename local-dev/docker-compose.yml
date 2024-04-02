@@ -135,6 +135,8 @@ services:
         condition: service_healthy
       svc-storage:
         condition: service_healthy
+      svc-compliance:
+        condition: service_healthy
 
   svc-pricing:
     image: ${PRICING_IMAGE}:${PRICING_TAG}
@@ -166,6 +168,8 @@ services:
   svc-assets:
     image: ${ASSETS_IMAGE}:${ASSETS_TAG}
     container_name: arrow-svc-assets
+    ports:
+      - ${ASSETS_HOST_PORT_REST}:8000
     extends:
       file: docker-compose/arrow-svc.yml
       service: server
@@ -248,9 +252,9 @@ services:
         condition: service_healthy
       svc-storage:
         condition: service_healthy
-      svc-compliance:
-        condition: service_healthy
       svc-atc:
         condition: service_healthy
       svc-discovery:
+        condition: service_healthy
+      svc-assets:
         condition: service_healthy
