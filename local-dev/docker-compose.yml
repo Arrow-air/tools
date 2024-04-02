@@ -188,6 +188,8 @@ services:
   svc-atc:
     image: ${ATC_IMAGE}:${ATC_TAG}
     container_name: arrow-svc-atc
+    ports:
+      - ${ATC_HOST_PORT_REST}:8000
     extends:
       file: docker-compose/arrow-svc.yml
       service: server
@@ -247,4 +249,8 @@ services:
       svc-storage:
         condition: service_healthy
       svc-compliance:
+        condition: service_healthy
+      svc-atc:
+        condition: service_healthy
+      svc-discovery:
         condition: service_healthy

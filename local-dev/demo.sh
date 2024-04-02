@@ -1,6 +1,12 @@
 #!/bin/bash
+
+SIM_CARRIER_BINARY='~/git/aetheric/sim-carrier/target/x86_64-unknown-linux-musl/release/sim-carrier'
 source .env
-BASE_URL="http://0.0.0.0:8014"
+BASE_URL="http://0.0.0.0:8099"
+TLM_PORT=8012
+ATC_PORT=8001
+CARGO_PORT=8002
+
 # echo "Running Population for $BASE_URL..."
 
 VERTIPORT_ID=$(curl \
@@ -27,8 +33,10 @@ fi
 echo "Vertiport ID: $VERTIPORT_ID"
 
 AIRCRAFT=("Marauder" "Mantis" "Ghost" "RazorCrest")
-
-echo "nickname,uuid,registration_number" > aircraft.csv
+# AIRCRAFT=("Marauder")
+LATITUDE=52.6379593
+LONGITUDE=5.1716790
+echo "nickname,uuid,registration,scanner_id" > aircraft.csv
 for i in "${!AIRCRAFT[@]}"; do
 	a=${AIRCRAFT[$i]}
 	REGISTRATION="AETH-CRAFT-$i"
@@ -38,8 +46,8 @@ for i in "${!AIRCRAFT[@]}"; do
 		-H "Content-Type: application/json" \
 		-d '{
 			"vertiport_id": '"$VERTIPORT_ID"',
-			"latitude": 52.6379593,
-			"longitude": 5.1716790,
+			"latitude": '"$LATITUDE"',
+			"longitude": '"$LONGITUDE"',
 			"label": "pad-'"$i"'"
 		}' \
 		$BASE_URL/demo/vertipad
@@ -56,7 +64,19 @@ for i in "${!AIRCRAFT[@]}"; do
 	}' \
 	http://0.0.0.0:$ITEST_HOST_PORT_REST/demo/aircraft)
 
-	echo "$a,$AIRCRAFT_ID,$REGISTRATION" >> aircraft.csv
+	# there's no org ids yet, so use a random UUID for it
+	SCANNER_ID=$(curl \
+		--request PUT \
+		-H "Content-Type: application/json" \
+		-d '{
+			"organization_id": '"$AIRCRAFT_ID"',
+			"scanner_type": "underbelly"
+		}' \
+		$BASE_URL/demo/scanner)
+
+	echo "$a,$AIRCRAFT_ID,$REGISTRATION,$SCANNER_ID" >> aircraft.csv
+
+	sh -c "$SIM_CARRIER_BINARY --uuid $AIRCRAFT_ID --name $REGISTRATION --tlm-port $TLM_PORT --atc-port $ATC_PORT --cargo-port $CARGO_PORT --latitude $LATITUDE --longitude $LONGITUDE --scanner-id $SCANNER_ID" &
 done
 
 #
@@ -116,3 +136,33 @@ curl \
 	"label": "pad-1"
 }' \
 $BASE_URL/demo/vertipad
+
+USER_ID=$(curl \
+--request PUT \
+-H "Content-Type: application/json" \
+-d '{
+	"display_name": "John Doe",
+	"email": "john@aetheric.nl"
+}' \
+$BASE_URL/demo/user)
+
+curl \
+--request POST \
+-H "Content-Type: application/json" \
+-d '{
+  "origin_vertiport_id": '"$WADDEN_ID"',
+  "target_vertiport_id": '"$HOORN_ID"',
+  "time_depart_window": {
+    "timestamp_min": "2024-04-01T14:00:33+00:00",
+    "timestamp_max": "2024-04-01T15:00:33+00:00"
+  },
+  "time_arrive_window": {
+    "timestamp_min": "2024-04-01T14:00:33+00:00",
+    "timestamp_max": "2024-04-01T18:00:33+00:00"
+  },
+  "cargo_weight_g": 200,
+  "user_id": '"$USER_ID"'
+}' \
+http://0.0.0.0:8002/cargo/request > cargo.json
+
+echo "\nUser ID: $USER_ID"
