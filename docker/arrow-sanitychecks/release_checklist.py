@@ -328,8 +328,7 @@ def check_todo_items(filenames, include_tests):
         print("\n(Some fields hidden. Use -t and -c to show hidden fields.)")
     print("\nEnd - Check Todo Items")
 
-
-def get_cargo_toml(filenames):
+def get_cargo_toml_deps(filenames):
     statements = {}
     for fname in filenames:
         f = open(fname, 'r')
@@ -339,24 +338,26 @@ def get_cargo_toml(filenames):
         i = 0
         for line in f.readlines():
             i += 1
-
-            result = re.search(r"[0-9]+\.[0-9]+\.[0-9]+", line)
-            if ('develop' not in line) and result:
-                key = f'{fname} ({i})'
-                statement = line.strip().replace('\n', '')
-                statement = statement.replace(r"\s+", r"\s")
-                statements[key] = {
-                    "statement": statement
-                }
+            key = f'{fname} ({i})'
+            statement = line.strip().replace('\n', '')
+            statement = statement.replace(r"\s+", r"\s")
+            statements[key] = {
+                "statement": statement
+            }
 
     return statements
 
-
 def check_cargo_toml(filenames):
     print("### \U0001F5C3 Checking Cargo.toml versions...\n")
-    statements = get_cargo_toml(filenames)
+    statements = get_cargo_toml_deps(filenames)
 
-    if not statements:
+    errors = []
+    for key in statements.keys():
+        statement = statements[key]["statement"]
+        if ("develop" not in statement) and re.search(r"[0-9]+\.[0-9]+\.[0-9]+", statement):
+            errors.append([key, statement])
+
+    if not errors:
         print("All good! \U0001F389\n")
         return
 
@@ -364,14 +365,47 @@ def check_cargo_toml(filenames):
     fmt_string = '{:<{longest_key}} | {:<50}'
     print(fmt_string.format("Location", "Statement", longest_key=longest_key))
     print(fmt_string.format("-"*longest_key, "-"*50, longest_key=longest_key))
-    for key in statements.keys():
-        statement = statements[key]["statement"]
+    for key, statement in errors:
         print(fmt_string.format(
             key,
             statement if len(statement) < 50 else statement[0:47] + '...',
             longest_key=longest_key
         ))
 
+def check_common_items(filenames, cargo_filenames):
+    print("### 💕 Checking for common items...\n")
+    statements = get_cargo_toml_deps(cargo_filenames)
+    longest_key = max([len(x) for x in statements.keys()])
+    fmt_string = '{:<{longest_key}} | {:<50} | {:<30}'
+
+    errors = []
+    for key in statements.keys():
+        statement = statements[key]["statement"]
+        if re.search(r"^uuid", statement):
+            errors.append(fmt_string.format(
+                key,
+                statement if len(statement) < 50 else statement[0:47] + '...',
+                "use lib_common::uuid::",
+                longest_key=longest_key
+            ))
+        elif re.search(r"^chrono", statement):
+            errors.append(fmt_string.format(
+                key,
+                statement if len(statement) < 50 else statement[0:47] + '...',
+                "use lib_common::time::",
+                longest_key=longest_key
+            ))
+
+    if not errors:
+        print("All good! \U0001F389\n")
+        return
+
+    print(fmt_string.format("Location", "Statement", "Replace with", longest_key=longest_key))
+    print(fmt_string.format("-"*longest_key, "-"*50, "-"*30, longest_key=longest_key))
+    for error in errors:
+        print(error)
+
+    print("\nEnd - Check Common Items")
 
 if __name__ == "__main__":
     print("\n## Release Checklist\n")
@@ -413,7 +447,10 @@ if __name__ == "__main__":
     separator()
 
     # Cargo.toml files
-    filenames = glob.glob("**/Cargo.toml", recursive=True)
+    cargo_filenames = glob.glob("**/Cargo.toml", recursive=True)
 
-    check_cargo_toml(filenames)
+    check_common_items(filenames, cargo_filenames)
+    separator()
+
+    check_cargo_toml(cargo_filenames)
     separator()
