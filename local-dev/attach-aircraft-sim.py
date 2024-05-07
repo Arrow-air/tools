@@ -86,10 +86,9 @@ if __name__ == "__main__":
 		print("Please set ASSETS_HOST_PORT_REST and ITEST_HOST_PORT_REST environment variables")
 		exit(1)
 
-	for vertiport in response:
+	for (hangar_count, vertiport) in enumerate(response):
 		if "Hangar" in vertiport['basics']['name']:
 			print(vertiport['basics']['name'])
 			boundary = vertiport['geo_location']['exterior']['points']
 			vertiport_id = vertiport['basics']['id']
 			populate_aircraft(vertiport_id, hangar_count, boundary, args.sim)
-			hangar_count += 1

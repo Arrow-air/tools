@@ -17,11 +17,11 @@ HOORN_HANGAR_ID=$(curl \
 		"label": "Hoorn Hangar #1",
 		"address": "Het Wuiver 2B, 1608 ES Wijdenes",
 		"vertices": [
-			[52.6387406, 5.1693605],
-			[52.6391572, 5.1751138],
-			[52.6366050, 5.1759725],
-			[52.6357195, 5.1696181],
-			[52.6387406, 5.1693605]
+			[52.6259713, 5.1300738],
+			[52.6256831, 5.1301865],
+			[52.6259029, 5.1313565],
+			[52.6261780, 5.1311767],
+			[52.6259713, 5.1300738]
 		],
 		"altitude": 0.0
 	}' \
@@ -29,7 +29,7 @@ HOORN_HANGAR_ID=$(curl \
 )
 
 if [ -z "$HOORN_HANGAR_ID" ]; then
-	echo "Failed to create vertiport"
+	echo "Failed to create hangar"
 	exit 1
 fi
 
@@ -54,6 +54,12 @@ KATWOUDE_HANGAR_ID=$(curl \
 }' \
 $BASE_URL/demo/vertiport)
 
+
+if [ -z "$KATWOUDE_HANGAR_ID" ]; then
+	echo "Failed to create hangar"
+	exit 1
+fi
+
 #
 # HOORN
 #
@@ -74,17 +80,20 @@ HOORN_ID=$(curl \
 }' \
 $BASE_URL/demo/vertiport)
 
-curl \
---request PUT \
--H "Content-Type: application/json" \
--d '{
-	"vertiport_id": '"$HOORN_ID"',
-	"latitude": 52.6484013,
-	"longitude": 4.9897020,
-	"altitude": 10.1,
-	"label": "pad-1"
-}' \
-$BASE_URL/demo/vertipad
+for i in {1..3}
+do
+	curl \
+	--request PUT \
+	-H "Content-Type: application/json" \
+	-d '{
+		"vertiport_id": '"$HOORN_ID"',
+		"latitude": 52.6484013,
+		"longitude": 4.9897020,
+		"altitude": 10.1,
+		"label": "pad-1"
+	}' \
+	$BASE_URL/demo/vertipad;
+done
 
 #
 # ALMERE
@@ -106,6 +115,8 @@ ALMERE_ID=$(curl \
 }' \
 $BASE_URL/demo/vertiport)
 
+for i in {1..3}
+do
 curl \
 --request PUT \
 -H "Content-Type: application/json" \
@@ -117,6 +128,7 @@ curl \
 	"label": "pad-1"
 }' \
 $BASE_URL/demo/vertipad
+done
 
 #
 # ENKHUIZEN
@@ -138,6 +150,8 @@ ENKHUIZEN_ID=$(curl \
 }' \
 $BASE_URL/demo/vertiport)
 
+for i in {1..3}
+do
 curl \
 --request PUT \
 -H "Content-Type: application/json" \
@@ -149,6 +163,7 @@ curl \
 	"label": "pad-1"
 }' \
 $BASE_URL/demo/vertipad
+done
 
 #
 # MARKEN
@@ -170,6 +185,8 @@ MARKEN_ID=$(curl \
 }' \
 $BASE_URL/demo/vertiport)
 
+for i in {1..3}
+do
 curl \
 --request PUT \
 -H "Content-Type: application/json" \
@@ -181,6 +198,7 @@ curl \
 	"label": "pad-1"
 }' \
 $BASE_URL/demo/vertipad
+done
 
 #
 # MARKER WADDEN
@@ -202,6 +220,8 @@ WADDEN_ID=$(curl \
 }' \
 $BASE_URL/demo/vertiport)
 
+for i in {1..3}
+do
 curl \
 --request PUT \
 -H "Content-Type: application/json" \
@@ -213,6 +233,7 @@ curl \
 	"label": "pad-1"
 }' \
 $BASE_URL/demo/vertipad
+done
 
 USER_ID=$(curl \
 --request PUT \
