@@ -333,7 +333,7 @@ class TarpaulinError(Enum):
 
 def get_tarpaulin_no_coverage(filenames):
     statements = {}
-    expected = "no_coverage: (R[0-9a-z]+) .{5,}"
+    expected = "no_coverage: \(R[0-9a-z]+\)"
     for fname in filenames:
         f = open(fname, 'r')
 
@@ -374,7 +374,7 @@ def check_tarpaulin_no_coverage(filenames):
         return
 
     longest_value = max([len(x["statement"]) for x in statements.values()])
-    longest_value = min(longest_value, 50)
+    longest_value = min(longest_value, 55)
     longest_key = max([len(x) for x in statements.keys()])
     fmt_string = '{:<{longest_key}} | {:<{longest_value}} | {:<50}'
     print(fmt_string.format("Location",
@@ -399,7 +399,7 @@ def check_tarpaulin_no_coverage(filenames):
 
         print(fmt_string.format(
             key,
-            value if len(value) < 50 else value[0:47] + '...',
+            value if len(value) < 55 else value[0:52] + '...',
             problem,
             longest_key=longest_key,
             longest_value=longest_value
