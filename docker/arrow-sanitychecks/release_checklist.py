@@ -260,10 +260,6 @@ def check_unwraps(filenames, include_tests, include_comments):
         print("\n(Some fields hidden. Use -t and -c to show hidden fields.)")
 
 
-def separator():
-    print("{}\n".format("-"*80))
-
-
 def get_todo_items(filenames):
     statements = {}
     for fname in filenames:
@@ -328,6 +324,90 @@ def check_todo_items(filenames, include_tests):
         print("\n(Some fields hidden. Use -t and -c to show hidden fields.)")
     print("\nEnd - Check Todo Items")
 
+
+class TarpaulinError(Enum):
+    NO_RATIONALE = 1
+    NO_RELEASE = 2
+    NONE = 3
+
+
+def get_tarpaulin_no_coverage(filenames):
+    statements = {}
+    expected = "no_coverage: \(R[0-9a-z]+\)"
+    for fname in filenames:
+        f = open(fname, 'r')
+
+        gathering = ""
+        i = 0
+
+        for line in f.readlines():
+            i += 1
+            if gathering:
+                if "//" not in line:
+                    gathering = ""
+
+                statements[key]["statement"] += line.strip().replace(r"\s+", r"\s")
+
+                if re.search(expected, line):
+                    statements[key]["problem"] = TarpaulinError.NONE
+                elif "no_coverage: " in line:
+                    statements[key]["problem"] = TarpaulinError.NO_RELEASE
+
+            if 'tarpaulin_include' in line:
+                key = f'{fname} ({i})'
+                gathering = key
+                value = line.strip().replace(r"\s+", r"\s")
+                statements[key] = {
+                    "statement": value,
+                    "problem": TarpaulinError.NO_RATIONALE
+                }
+
+    return statements
+
+
+def check_tarpaulin_no_coverage(filenames):
+    print(
+        "### \U000026FA Checking for #[cfg(not(tarpaulin_include))] with rationale...\n")
+    statements = get_tarpaulin_no_coverage(filenames)
+    if not statements:
+        print("All good! \U0001F389\n")
+        return
+
+    longest_value = max([len(x["statement"]) for x in statements.values()])
+    longest_value = min(longest_value, 55)
+    longest_key = max([len(x) for x in statements.keys()])
+    fmt_string = '{:<{longest_key}} | {:<{longest_value}} | {:<50}'
+    print(fmt_string.format("Location",
+                            "Statement", "Problem", longest_key=longest_key, longest_value=longest_value))
+    print(
+        fmt_string.format(
+            "-"*longest_key, "-"*longest_value, "-"*50,
+            longest_key=longest_key,
+            longest_value=longest_value
+        )
+    )
+    for key in statements.keys():
+        value = statements[key]["statement"]
+        problem = statements[key]["problem"]
+
+        if problem == TarpaulinError.NO_RATIONALE:
+            problem = "No rationale (// no_coverage: )"
+        elif problem == TarpaulinError.NO_RELEASE:
+            problem = "No release (// no_coverage: (R0) ...)"
+        else:
+            problem = ""
+
+        print(fmt_string.format(
+            key,
+            value if len(value) < 55 else value[0:52] + '...',
+            problem,
+            longest_key=longest_key,
+            longest_value=longest_value
+        ))
+
+    print("\nEnd - Check #[cfg(not(tarpaulin_include))] Items")
+
+
 def get_cargo_toml_deps(filenames):
     statements = {}
     for fname in filenames:
@@ -346,6 +426,7 @@ def get_cargo_toml_deps(filenames):
             }
 
     return statements
+
 
 def check_cargo_toml(filenames):
     print("### \U0001F5C3 Checking Cargo.toml versions...\n")
@@ -371,6 +452,7 @@ def check_cargo_toml(filenames):
             statement if len(statement) < 50 else statement[0:47] + '...',
             longest_key=longest_key
         ))
+
 
 def check_common_items(filenames, cargo_filenames):
     print("### 💕 Checking for common items...\n")
@@ -400,12 +482,19 @@ def check_common_items(filenames, cargo_filenames):
         print("All good! \U0001F389\n")
         return
 
-    print(fmt_string.format("Location", "Statement", "Replace with", longest_key=longest_key))
-    print(fmt_string.format("-"*longest_key, "-"*50, "-"*30, longest_key=longest_key))
+    print(fmt_string.format("Location", "Statement",
+        "Replace with", longest_key=longest_key))
+    print(fmt_string.format("-"*longest_key, "-" *
+        50, "-"*30, longest_key=longest_key))
     for error in errors:
         print(error)
 
     print("\nEnd - Check Common Items")
+
+
+def separator():
+    print("{}\n".format("-"*80))
+
 
 if __name__ == "__main__":
     print("\n## Release Checklist\n")
@@ -436,21 +525,18 @@ if __name__ == "__main__":
 
     check_log_statements(filenames, args.tests, args.comments)
     separator()
-
     check_dead_code(filenames)
     separator()
-
     check_unwraps(filenames, args.tests, args.comments)
     separator()
-
     check_todo_items(filenames, args.tests)
+    separator()
+    check_tarpaulin_no_coverage(filenames)
     separator()
 
     # Cargo.toml files
     cargo_filenames = glob.glob("**/Cargo.toml", recursive=True)
-
     check_common_items(filenames, cargo_filenames)
     separator()
-
     check_cargo_toml(cargo_filenames)
     separator()
