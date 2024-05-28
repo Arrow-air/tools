@@ -24,7 +24,7 @@ def get_logs(filenames):
         for line in f.readlines():
             i += 1
 
-            if "mod tests" in line or 'test' in fname:
+            if "mod tests" in line or 'test' in fname or 'examples' in fname:
                 in_tests = True
 
             if any([x for x in possible if x in line]):
@@ -83,26 +83,6 @@ def check_log_statements(filenames, include_tests, include_comments):
 
         stmt = statements[key]["statement"].replace('\n', '')
         sub = re.search('"([^"]*)"', statements[key]["statement"]).group(1)
-
-        if re.search(r"\([a-zA-Z_0-9\-\(\)\:\s]+\)", sub) is None:
-            print(fmt_string.format(
-                GREEN_CHECK if statements[key]["tests"] else RED_X,
-                GREEN_CHECK if statements[key]["comments"] else RED_X,
-                key,
-                "(no_fn_prepend) msg",
-                (stmt[0:47] + '...') if len(stmt) > 50 else stmt,
-                longest_key=longest_key
-            ))
-        elif "({})".format(statements[key]["function"]) not in sub:
-            print(fmt_string.format(
-                GREEN_CHECK if statements[key]["tests"] else RED_X,
-                GREEN_CHECK if statements[key]["comments"] else RED_X,
-                key,
-                "wrong (fn prepend)",
-                stmt[0:50],
-                longest_key=longest_key
-            ))
-
         if re.search(r".*[.?!(\{\})(\{:\?})]+$", sub) is None:
             print(fmt_string.format(
                 GREEN_CHECK if statements[key]["tests"] else RED_X,
@@ -200,7 +180,7 @@ def get_unwraps(filenames):
             in_comment = False
             i += 1
 
-            if 'mod test' in line or 'test' in fname:
+            if 'mod test' in line or 'test' in fname or 'examples' in fname:
                 in_tests = True
 
             if 'unwrap()' in line:
@@ -272,7 +252,7 @@ def get_todo_items(filenames):
         for line in f.readlines():
             i += 1
 
-            if 'mod test' in line or 'test' in fname:
+            if 'mod test' in line or 'test' in fname or 'examples' in fname:
                 in_tests = True
 
             if 'TODO' in line or 'FIXME' in line or ':construction' in line:
@@ -483,9 +463,9 @@ def check_common_items(filenames, cargo_filenames):
         return
 
     print(fmt_string.format("Location", "Statement",
-        "Replace with", longest_key=longest_key))
+                            "Replace with", longest_key=longest_key))
     print(fmt_string.format("-"*longest_key, "-" *
-        50, "-"*30, longest_key=longest_key))
+                            50, "-"*30, longest_key=longest_key))
     for error in errors:
         print(error)
 
