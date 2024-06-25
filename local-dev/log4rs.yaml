@@ -75,6 +75,20 @@ appenders:
         base: 1
     encoder:
       kind: json
+  tasks:
+    kind: rolling_file
+    path: "logs/tasks.log"
+    policy:
+      trigger:
+        kind: size
+        limit: 20mb
+      roller:
+        kind: fixed_window
+        pattern: logs/tasks_{}.gz
+        count: 5
+        base: 1
+    encoder:
+      kind: json
   postgis:
     kind: rolling_file
     path: "logs/postgis.log"
@@ -114,8 +128,12 @@ loggers:
     level: info
     appenders:
       - backend_requests
-  app::grpc:
+  backend::tasks:
     level: info
+    appenders:
+      - tasks
+  app::grpc:
+    level: debug
     appenders:
       - grpc_requests
   app::client::storage::grpc:
@@ -123,15 +141,15 @@ loggers:
     appenders:
       - grpc_clients
   app::rest:
-    level: debug
+    level: info
     appenders:
       - rest_requests
   app::router:
-    level: debug
+    level: info
     appenders:
       - router
   backend::postgis:
-    level: debug
+    level: info
     appenders:
       - postgis
   test::ut:
