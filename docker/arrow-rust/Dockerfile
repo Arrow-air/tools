@@ -1,4 +1,4 @@
-FROM rust:1.76-alpine
+FROM rust:1.81-alpine
 
 ARG TARGETOS
 ARG TARGETARCH
@@ -20,7 +20,7 @@ RUN apk add --no-cache musl-dev libc-dev pkgconfig openssl \
     rustup component add clippy && \
     rustup component add rustfmt && \
     # Use binary install for tarpaulin to bypass build OOM error
-    wget https://github.com/xd009642/tarpaulin/releases/download/0.27.1/cargo-tarpaulin-${ARCHITECTURE}.tar.gz && \
+    wget https://github.com/xd009642/tarpaulin/releases/download/0.31.2/cargo-tarpaulin-${ARCHITECTURE}.tar.gz && \
     tar axvf cargo-tarpaulin-${ARCHITECTURE}.tar.gz && \
     mv cargo-tarpaulin $CARGO_HOME/bin/ && \
     rm cargo-tarpaulin-${ARCHITECTURE}.tar.gz
