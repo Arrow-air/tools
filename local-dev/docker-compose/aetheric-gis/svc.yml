@@ -6,7 +6,7 @@ volumes:
 
 services:
   init-ssl:
-    container_name: arrow-gis-init-ssl
+    container_name: aetheric-gis-init-ssl
     image: ghcr.io/arrow-air/tools/arrow-gis:1.0
     volumes:
       - type: volume
@@ -26,7 +26,7 @@ services:
       - GID=1001
 
   init:
-    container_name: arrow-gis-init
+    container_name: aetheric-gis-init
     image: ghcr.io/arrow-air/tools/arrow-gis:1.0
     user: "postgres:1001"
     volumes:
@@ -53,7 +53,7 @@ services:
       - SERVER_HOSTNAME
 
   server:
-    container_name: arrow-gis
+    container_name: aetheric-gis
     image: ghcr.io/arrow-air/tools/arrow-gis:1.0
     restart: always
     user: "postgres:1001"

@@ -11,8 +11,8 @@ services:
           "-addr",
           "localhost:${DOCKER_PORT_GRPC}"
         ]
-      interval: 2s
-      timeout: 1s
+      interval: 5s
+      timeout: 5s
       retries: 3
       start_period: 30s
     volumes:
@@ -62,6 +62,9 @@ services:
       - DISCOVERY_PORT_GRPC=$DOCKER_PORT_GRPC
       - DISCOVERY_PORT_REST
       - DISCOVERY_HOST_GRPC
+      - CONTACT_PORT_GRPC=$DOCKER_PORT_GRPC
+      - CONTACT_PORT_REST
+      - CONTACT_HOST_GRPC
       - REST_CONCURRENCY_LIMIT_PER_SERVICE
       - REST_CORS_ALLOWED_ORIGIN
       - REST_REQUEST_LIMIT_PER_SECOND

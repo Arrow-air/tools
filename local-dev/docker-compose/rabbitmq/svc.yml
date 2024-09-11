@@ -5,7 +5,7 @@ volumes:
 
 services:
   server:
-    container_name: arrow-rabbitmq
+    container_name: aetheric-rabbitmq
     image: rabbitmq:3.11-alpine
     restart: always
     ports:
