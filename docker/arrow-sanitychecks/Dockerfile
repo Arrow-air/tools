@@ -1,7 +1,6 @@
-FROM tamasfe/taplo:0.8.1-alpine AS taplo
+FROM tamasfe/taplo:0.9.3-alpine AS taplo
 
-FROM --platform=$TARGETPLATFORM rust:1.73-alpine
-
+FROM rust:1.81-alpine
 
 ENV RUSTUP_HOME=/usr/local/rustup \
     CARGO_HOME=/usr/local/cargo \
@@ -10,10 +9,7 @@ ENV RUSTUP_HOME=/usr/local/rustup \
 COPY --from=taplo /usr/bin/taplo /usr/bin/taplo
 COPY ./release_checklist.py /usr/bin/release_checklist.py
 
-RUN apk add --no-cache py3-pip openssl npm git && \
-    # Add python dependencies
-    pip install autopep8 && \
-    pip install pycodestyle && \
+RUN apk add --no-cache py3-pip py3-autopep8 py3-pycodestyle openssl npm git && \
     # Add cspell dependencies
     npm install -g cspell && \
     npm install -g @cspell/dict-rust && \
