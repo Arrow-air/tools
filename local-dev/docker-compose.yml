@@ -27,25 +27,25 @@ services:
       cockroachdb-init:
         condition: service_completed_successfully
 
-  arrow-gis-init-ssl:
+  aetheric-gis-init-ssl:
     extends:
-      file: docker-compose/arrow-gis/svc.yml
+      file: docker-compose/aetheric-gis/svc.yml
       service: init-ssl
 
-  arrow-gis-init:
+  aetheric-gis-init:
     extends:
-      file: docker-compose/arrow-gis/svc.yml
+      file: docker-compose/aetheric-gis/svc.yml
       service: init
     depends_on:
-      arrow-gis-init-ssl:
+      aetheric-gis-init-ssl:
         condition: service_completed_successfully
 
-  arrow-gis:
+  aetheric-gis:
     extends:
-      file: docker-compose/arrow-gis/svc.yml
+      file: docker-compose/aetheric-gis/svc.yml
       service: server
     depends_on:
-      arrow-gis-init:
+      aetheric-gis-init:
         condition: service_completed_successfully
 
   redis:
@@ -60,9 +60,9 @@ services:
 
   svc-storage:
     image: ${STORAGE_IMAGE}:${STORAGE_TAG}
-    container_name: arrow-svc-storage
+    container_name: aetheric-svc-storage
     extends:
-      file: docker-compose/arrow-svc.yml
+      file: docker-compose/aetheric-svc.yml
       service: server
     depends_on:
       cockroachdb:
@@ -74,23 +74,24 @@ services:
         read_only: true
     command: --rebuild-psql=true  --init-psql=true
     environment:
+      - USE_TLS=true
       - PG__USER=svc_storage
-      - PG__DBNAME=arrow
+      - PG__DBNAME=realm
       - PG__HOST=cockroachdb
       - PG__PORT=26257
-      - PG__SSLMODE=require
+      - PG__SSLMODE=Require
       - DB_CA_CERT=/cockroach/ssl/certs/ca.crt
       - DB_CLIENT_CERT=/cockroach/ssl/certs/client.svc_storage.crt
       - DB_CLIENT_KEY=/cockroach/ssl/certs/client.svc_storage.key.pk8
 
   svc-gis:
     image: ${GIS_IMAGE}:${GIS_TAG}
-    container_name: arrow-svc-gis
+    container_name: aetheric-svc-gis
     extends:
-      file: docker-compose/arrow-svc.yml
+      file: docker-compose/aetheric-svc.yml
       service: server
     depends_on:
-      arrow-gis:
+      aetheric-gis:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -102,7 +103,7 @@ services:
     environment:
       - PG__USER=svc_gis
       - PG__DBNAME=gis
-      - PG__HOST=arrow-gis
+      - PG__HOST=aetheric-gis
       - PG__PORT=5432
       - PG__SSLMODE=require
       - DB_CA_CERT=/ssl/certs/root.crt
@@ -111,9 +112,9 @@ services:
 
   svc-compliance:
     image: ${COMPLIANCE_IMAGE}:${COMPLIANCE_TAG}
-    container_name: arrow-svc-compliance
+    container_name: aetheric-svc-compliance
     extends:
-      file: docker-compose/arrow-svc.yml
+      file: docker-compose/aetheric-svc.yml
       service: server
     depends_on:
       svc-gis:
@@ -126,9 +127,9 @@ services:
 
   svc-scheduler:
     image: ${SCHEDULER_IMAGE}:${SCHEDULER_TAG}
-    container_name: arrow-svc-scheduler
+    container_name: aetheric-svc-scheduler
     extends:
-      file: docker-compose/arrow-svc.yml
+      file: docker-compose/aetheric-svc.yml
       service: server
     depends_on:
       svc-gis:
@@ -138,16 +139,16 @@ services:
 
   svc-pricing:
     image: ${PRICING_IMAGE}:${PRICING_TAG}
-    container_name: arrow-svc-pricing
+    container_name: aetheric-svc-pricing
     extends:
-      file: docker-compose/arrow-svc.yml
+      file: docker-compose/aetheric-svc.yml
       service: server
 
   svc-cargo:
     image: ${CARGO_IMAGE}:${CARGO_TAG}
-    container_name: arrow-svc-cargo
+    container_name: aetheric-svc-cargo
     extends:
-      file: docker-compose/arrow-svc.yml
+      file: docker-compose/aetheric-svc.yml
       service: server
     ports:
       - ${CARGO_HOST_PORT_REST}:8000
@@ -165,9 +166,11 @@ services:
 
   svc-assets:
     image: ${ASSETS_IMAGE}:${ASSETS_TAG}
-    container_name: arrow-svc-assets
+    container_name: aetheric-svc-assets
+    ports:
+      - ${ASSETS_HOST_PORT_REST}:8000
     extends:
-      file: docker-compose/arrow-svc.yml
+      file: docker-compose/aetheric-svc.yml
       service: server
     depends_on:
       svc-storage:
@@ -175,11 +178,11 @@ services:
 
   svc-contact:
     image: ${CONTACT_IMAGE}:${CONTACT_TAG}
-    container_name: arrow-svc-contact
+    container_name: aetheric-svc-contact
     ports:
       - ${CONTACT_HOST_PORT_REST}:8000
     extends:
-      file: docker-compose/arrow-svc.yml
+      file: docker-compose/aetheric-svc.yml
       service: server
     depends_on:
       svc-storage:
@@ -187,9 +190,11 @@ services:
 
   svc-atc:
     image: ${ATC_IMAGE}:${ATC_TAG}
-    container_name: arrow-svc-atc
+    container_name: aetheric-svc-atc
+    ports:
+      - ${ATC_HOST_PORT_REST}:8000
     extends:
-      file: docker-compose/arrow-svc.yml
+      file: docker-compose/aetheric-svc.yml
       service: server
     depends_on:
       svc-storage:
@@ -197,11 +202,11 @@ services:
 
   svc-telemetry:
     image: ${TELEMETRY_IMAGE}:${TELEMETRY_TAG}
-    container_name: arrow-svc-telemetry
+    container_name: aetheric-svc-telemetry
     ports:
       - ${TELEMETRY_HOST_PORT_REST}:8000
     extends:
-      file: docker-compose/arrow-svc.yml
+      file: docker-compose/aetheric-svc.yml
       service: server
     depends_on:
       svc-gis:
@@ -217,11 +222,11 @@ services:
 
   svc-discovery:
     image: ${DISCOVERY_IMAGE}:${DISCOVERY_TAG}
-    container_name: arrow-svc-discovery
+    container_name: aetheric-svc-discovery
     ports:
       - ${DISCOVERY_HOST_PORT_REST}:8000
     extends:
-      file: docker-compose/arrow-svc.yml
+      file: docker-compose/aetheric-svc.yml
       service: server
     depends_on:
       svc-gis:
@@ -231,11 +236,11 @@ services:
 
   svc-itest:
     image: ${ITEST_IMAGE}:${ITEST_TAG}
-    container_name: arrow-svc-itest
+    container_name: aetheric-svc-itest
     ports:
       - ${ITEST_HOST_PORT_REST}:8000
     extends:
-      file: docker-compose/arrow-svc.yml
+      file: docker-compose/aetheric-svc.yml
       service: server
     depends_on:
       svc-telemetry:
@@ -248,3 +253,12 @@ services:
         condition: service_healthy
       svc-compliance:
         condition: service_healthy
+
+  dozzle:
+    container_name: aetheric-dozzle
+    image: amir20/dozzle:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - ${DOZZLE_PORT}:8080
+    restart: always

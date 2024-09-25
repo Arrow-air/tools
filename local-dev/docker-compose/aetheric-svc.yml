@@ -1,0 +1,38 @@
+---
+version: "3.6"
+
+services:
+  server:
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "grpc_health_probe",
+          "-addr",
+          "localhost:${DOCKER_PORT_GRPC}"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    volumes:
+      - type: bind
+        source: logs/
+        target: /logs/
+    configs:
+      - source: log4rs
+        target: ${LOG_CONFIG}
+      - source: dot-env
+        target: /.env
+    environment:
+      - ASSETS_PORT_GRPC=${DOCKER_PORT_GRPC}
+      - ATC_PORT_GRPC=${DOCKER_PORT_GRPC}
+      - CARGO_PORT_GRPC=${DOCKER_PORT_GRPC}
+      - COMPLIANCE_PORT_GRPC=${DOCKER_PORT_GRPC}
+      - CONTACT_PORT_GRPC=${DOCKER_PORT_GRPC}
+      - DISCOVERY_PORT_GRPC=${DOCKER_PORT_GRPC}
+      - GIS_PORT_GRPC=${DOCKER_PORT_GRPC}
+      - PRICING_PORT_GRPC=${DOCKER_PORT_GRPC}
+      - SCHEDULER_PORT_GRPC=${DOCKER_PORT_GRPC}
+      - STORAGE_PORT_GRPC=${DOCKER_PORT_GRPC}
+      - TELEMETRY_PORT_GRPC=${DOCKER_PORT_GRPC}

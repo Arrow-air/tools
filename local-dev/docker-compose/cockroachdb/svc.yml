@@ -6,7 +6,7 @@ volumes:
 
 services:
   init:
-    container_name: arrow-cockroachdb-init
+    container_name: aetheric-cockroachdb-init
     image: cockroachdb/cockroach:latest-v22.1
     volumes:
       - type: volume
@@ -23,7 +23,7 @@ services:
     command: ["/scripts/cockroachdb-init.sh"]
 
   server:
-    container_name: arrow-cockroachdb
+    container_name: aetheric-cockroachdb
     image: cockroachdb/cockroach:latest-v22.1
     volumes:
       - type: bind
@@ -38,8 +38,8 @@ services:
         read_only: true
     healthcheck:
       test: "curl -sf http://localhost:8080 > /dev/null"
-      interval: 2s
-      timeout: 1s
+      interval: 5s
+      timeout: 5s
       retries: 3
     ports:
       - 26257:26257
